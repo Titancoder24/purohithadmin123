@@ -1,0 +1,10 @@
+import { LockKeyhole, ShieldCheck } from "lucide-react";
+import Image from "next/image";
+import { login } from "@/app/actions/auth";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string; setup?: string }> }) {
+  const query = await searchParams;
+  const configured = isSupabaseConfigured();
+  return <main className="login-page"><section className="login-story"><div className="login-brand"><span className="brand-logo large"><Image src="/purohithconnect-logo.png" alt="Purohith Connect" width={54} height={54} priority/></span><strong>Purohith Connect</strong></div><div><p className="eyebrow light">Platform operations</p><h1>One place to run every sacred service.</h1><p>Manage the marketplace, uphold priest quality, publish trusted ceremony guidance, and understand how families use the platform.</p></div><div className="trust-line"><ShieldCheck size={18}/>Protected by Supabase Auth and row-level security</div></section><section className="login-panel"><div className="login-form"><div className="login-lock"><LockKeyhole size={20}/></div><p className="eyebrow">Restricted access</p><h2>Sign in to the console</h2><p className="muted">Use an account whose `app_users.role` is `admin` or `super_admin`.</p>{!configured && <div className="notice warning"><strong>Configuration required</strong><span>Add the project URL and publishable key to `.env.local` before signing in.</span></div>}{query.error && <div className="notice error">{decodeURIComponent(query.error)}</div>}<form action={login} className="stack-form"><label>Email<input name="email" type="email" autoComplete="email" required placeholder="admin@purohithconnect.com" disabled={!configured}/></label><label>Password<input name="password" type="password" autoComplete="current-password" required placeholder="Your secure password" disabled={!configured}/></label><button className="primary-button full" disabled={!configured}>Sign in securely</button></form><small className="legal">Access is logged. Never share production credentials.</small></div></section></main>;
+}

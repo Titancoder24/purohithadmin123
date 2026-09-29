@@ -1,0 +1,4 @@
+full_name,email,phone,profile_headline,bio,years_experience,service_areas,primary_service_area,languages,pooja_slugs,starting_price_inr,max_price_inr,verification_status
+Sample Purohit One,sample-priest-1@example.com,+91 00000 00001,Vedic priest for home ceremonies,Fictional sample profile for testing the roster format,8,Jayanagar|JP Nagar,Jayanagar,Kannada|Sanskrit,griha-pravesh|rudrabhishek,2500,6000,pending
+Sample Purohit Two,,+91 00000 00002,Priest for traditional pujas,Fictional sample profile for testing the roster format,5,Indiranagar|Koramangala,Indiranagar,Hindi|English,satyanarayan,1800,4500,pending
+Sample Purohit Three,sample-priest-3@example.com,+91 00000 00003,Experienced ceremony priest,Fictional sample profile for testing the roster format,12,Whitefield|Marathahalli,Whitefield,Telugu|Sanskrit,ganesh-pooja,3000,8000,pending

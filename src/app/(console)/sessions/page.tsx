@@ -1,0 +1,12 @@
+import { MonitorSmartphone, Radio, UserRoundCheck, WifiOff } from "lucide-react";
+import { Kpi } from "@/components/kpi";
+import { PageHeading } from "@/components/page-heading";
+import { getOperationsAnalytics } from "@/lib/data";
+
+const stamp = (value: unknown) => value ? new Intl.DateTimeFormat("en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(String(value))) : "Unknown";
+
+export default async function SessionsPage() {
+  const { sessions, activeSessionCount, recentEvents, events } = await getOperationsAnalytics();
+  const identified = sessions.filter((session) => Boolean(session.user_id));
+  return <><PageHeading eyebrow="Session intelligence" title="Live sessions and screen activity" description="Inspect privacy-conscious product sessions and recent screen events from Expo web, iOS, Android, and the public website."/><section className="kpi-grid"><Kpi label="Active now" value={activeSessionCount} detail="Seen in the last 15 minutes" icon={Radio} tone="orange"/><Kpi label="Captured sessions" value={sessions.length} detail="Recent session records" icon={MonitorSmartphone}/><Kpi label="Identified sessions" value={identified.length} detail="Associated with an authenticated user" icon={UserRoundCheck} tone="green"/><Kpi label="Screen events" value={events} detail="Last 90 days" icon={WifiOff}/></section>{!sessions.length && <div className="notice warning"><strong>Session heartbeat is not being emitted.</strong><span>Screen events are arriving, but current events lack a session ID. DAU/WAU/MAU remain conservative until the Expo telemetry client creates and updates platform_sessions.</span></div>}<section className="table-panel"><div className="table-toolbar"><strong>Recent screen activity</strong><span>Latest {recentEvents.length}</span></div><div className="data-table"><div className="table-row session-table table-head"><span>Screen</span><span>Platform</span><span>Identity</span><span>Session</span><span>Observed</span></div>{recentEvents.map((event, index) => <div className="table-row session-table" key={`${String(event.created_at)}-${index}`}><span><strong>{String(event.route || "Unknown")}</strong><small>{String(event.event_name || "event")}</small></span><span>{String(event.platform || "Unknown")}</span><span>{event.user_id ? "Signed in" : "Anonymous"}</span><span>{event.session_id ? String(event.session_id).slice(0, 8) : "Not captured"}</span><span>{stamp(event.created_at)}</span></div>)}</div></section></>;
+}

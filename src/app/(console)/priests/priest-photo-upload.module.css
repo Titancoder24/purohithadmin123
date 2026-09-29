@@ -1,0 +1,7 @@
+.dropZone { display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:14px; border:2px dashed #d5c7c0; border-radius:8px; background:#fffaf5; cursor:pointer; }
+.dropZone span { display:grid; gap:3px; flex:1; min-width:180px; }
+.dropZone strong { font-size:13px; }
+.dropZone small { color:#766e65; font-size:11px; }
+.dropZone input { max-width:240px; font-size:11px; }
+.dragging { background:#e8f5ec; border-color:#43855b; }
+.preview { display:block; width:88px; height:88px; margin-top:8px; object-fit:cover; border-radius:12px; }

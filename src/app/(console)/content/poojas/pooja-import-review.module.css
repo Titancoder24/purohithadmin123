@@ -1,0 +1,22 @@
+.review { padding: 20px; }
+.toolbar { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }
+.fileLabel { display: grid; gap: 7px; flex: 1; min-width: 240px; color: #5e5953; font-size: 11px; font-weight: 700; }
+.fileLabel input { width: 100%; border: 1px dashed #d5c7c0; border-radius: 6px; padding: 9px; background: white; font-size: 12px; }
+.hint { margin: 10px 0 0; color: #766e65; font-size: 11px; line-height: 1.5; }
+.summary { display: flex; justify-content: space-between; gap: 12px; margin: 20px 0 9px; font-size: 12px; }
+.summary span { color: #766e65; overflow-wrap: anywhere; }
+.scroller { max-height: 560px; overflow: auto; border: 1px solid #e6e0d9; border-radius: 7px; }
+.table { width: max-content; min-width: 100%; border-collapse: collapse; font-size: 11px; }
+.table th { position: sticky; top: 0; z-index: 1; background: #f7f3ef; color: #655d55; text-align: left; font-size: 10px; white-space: nowrap; }
+.table td,.table th { padding: 8px; border-bottom: 1px solid #eee8e1; vertical-align: top; }
+.table tr:last-child td { border-bottom: 0; }
+.table input:not([type="checkbox"]),.table textarea { display: block; width: 160px; min-height: 34px; padding: 7px; border: 1px solid #ded7d0; border-radius: 5px; background: white; color: #211b17; font: inherit; }
+.table textarea { resize: vertical; }
+.table input[type="number"] { width: 85px; }
+.table input[type="checkbox"] { width: 17px; height: 17px; }
+.imageCell { min-width: 175px; }
+.imageCell img { display: block; width: 56px; height: 56px; margin-bottom: 6px; border-radius: 5px; object-fit: cover; }
+.imageCell input[type="file"] { width: 175px; font-size: 10px; }
+.imageCell input[type="url"] { margin-top: 6px; }
+.imageCell small { display: block; margin-top: 5px; }
+.footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; color: #766e65; font-size: 11px; }
