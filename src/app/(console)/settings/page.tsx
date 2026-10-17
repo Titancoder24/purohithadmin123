@@ -1,10 +1,15 @@
-import { CheckCircle2, Database, Globe2, KeyRound, Percent, Save } from "lucide-react";
-import { updateServiceFee } from "@/app/actions/settings";
+import { CheckCircle2, Database, Globe2, KeyRound, Save } from "lucide-react";
+import { updateBiddingMode, updateServiceFee } from "@/app/actions/settings";
+import { AppearanceEditor } from "./appearance-editor";
 import { PageHeading } from "@/components/page-heading";
-import { getPlatformSettings } from "@/lib/data";
+import { requireAdmin } from "@/lib/auth";
+import { DEFAULT_APPEARANCE } from "@/lib/appearance";
+import { getAdminConsoleTheme, getPlatformSettings } from "@/lib/data";
 
 export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ success?: string; error?: string }> }) {
-  const [query, { serviceFeePercent }] = await Promise.all([searchParams, getPlatformSettings()]);
+  const admin = await requireAdmin();
+  const [query, { serviceFeePercent, biddingEnabled }, savedTheme] = await Promise.all([searchParams, getPlatformSettings(), getAdminConsoleTheme(admin.id)]);
+  const consoleAppearance = savedTheme || DEFAULT_APPEARANCE;
   const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "Not configured";
 
   return (
@@ -12,7 +17,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       <PageHeading
         eyebrow="Platform configuration"
         title="Environment and settings"
-        description="Manage dynamic platform fees, commissions, and read-only production integration statuses."
+        description="Set the look of this console for your account, manage platform fees, and review production integration status. Customer app themes stay on each phone."
       />
 
       {query.success && <div className="notice success">{decodeURIComponent(query.success)}</div>}
@@ -32,14 +37,9 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         <form action={updateServiceFee} style={{ display: "grid", gap: "16px", maxWidth: "480px" }}>
           <label style={{ display: "grid", gap: "6px", fontSize: "12px", fontWeight: 600 }}>
             Platform service fee percentage (%)
-            <input
+            <select
               name="service_fee_percent"
-              type="number"
-              step="0.1"
-              min="0"
-              max="50"
               defaultValue={serviceFeePercent}
-              required
               style={{
                 height: "40px",
                 border: "1px solid var(--line)",
@@ -49,10 +49,10 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
                 fontFamily: "var(--font-geist-mono)",
                 background: "#faf9f8",
               }}
-            />
+            ><option value="5">5%</option><option value="10">10%</option></select>
           </label>
           <p style={{ margin: 0, color: "var(--muted)", fontSize: "11px", lineHeight: 1.5 }}>
-            This fee is dynamically deducted from purohit earnings upon booking settlement. Customers pay the ceremony price (e.g. ₹1,000), and the purohit receives the net amount after this fee (e.g. ₹900 at 10%). Changing this rate immediately applies to all future bookings.
+            The platform fee is added to the priest&apos;s published price on new bookings. For a ₹5,000 pooja at 10%, the customer pays ₹5,500. Existing bookings retain their original total.
           </p>
           <div>
             <button className="primary-button" type="submit">
@@ -60,6 +60,30 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
             </button>
           </div>
         </form>
+      </section>
+
+      <section className="panel" style={{ marginBottom: "22px" }}>
+        <div className="panel-heading"><div><p className="eyebrow">Booking method</p><h2>Customer bidding and proposals</h2></div></div>
+        <p style={{ color: "var(--muted)", fontSize: "12px" }}>Fixed price shows each priest&apos;s published rate. Enable bidding only when you want customers to request and compare proposals.</p>
+        <form action={updateBiddingMode} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <select name="bidding_enabled" defaultValue={String(biddingEnabled)} disabled={admin.role !== "super_admin"} aria-label="Customer bidding mode">
+            <option value="false">Fixed price only</option><option value="true">Allow proposals</option>
+          </select>
+          <button className="primary-button" disabled={admin.role !== "super_admin"}>Save booking method</button>
+        </form>
+      </section>
+
+      <section className="panel" style={{ marginBottom: "22px" }}>
+        <div className="panel-heading">
+          <div>
+            <p className="eyebrow" style={{ color: "var(--orange)", fontWeight: 700, margin: 0, fontSize: "11px" }}>This console</p>
+            <h2>Your theme and button style</h2>
+          </div>
+        </div>
+        <p style={{ margin: "0 0 16px", color: "var(--muted)", fontSize: "12px", lineHeight: 1.5, maxWidth: "680px" }}>
+          This changes the colors and buttons in the admin web app for your account. It does not change the customer or purohit apps. Those themes are chosen on each phone.
+        </p>
+        <AppearanceEditor initial={consoleAppearance} />
       </section>
 
       <section className="settings-grid">

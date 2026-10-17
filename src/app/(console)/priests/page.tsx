@@ -5,6 +5,7 @@ import { getPeopleData, getPoojas } from "@/lib/data";
 import { PriestPhotoUpload } from "./priest-photo-upload";
 import { PriestGalleryUpload } from "./priest-gallery-upload";
 import { PriestCredentialsFields } from "./priest-credentials-fields";
+import { PriestCredentialsHandoff } from "./priest-credentials-handoff";
 import { LocationTagPicker } from "./location-tag-picker";
 import { PriestImportReview } from "./priest-import-review";
 import { PriestListingTable } from "./priest-listing-table";
@@ -19,6 +20,7 @@ export default async function PriestsPage({ searchParams }: { searchParams: Prom
     <PageHeading eyebrow="Provider operations" title="Priest quality and coverage" description="Verify applications, maintain public marketplace profiles, and control the areas where each priest can be discovered."/>
     {query.error && <div className="notice error">{decodeURIComponent(query.error)}</div>}
     {query.success && <div className="notice success">{decodeURIComponent(query.success)}</div>}
+    <PriestCredentialsHandoff success={query.success ? decodeURIComponent(query.success) : undefined}/>
     <section className="panel bulk-onboard-panel">
       <div className="bulk-onboard-copy"><span className="feature-icon"><FileUp size={19}/></span><div><p className="eyebrow">High-volume onboarding</p><h2>Import up to 250 Purohits</h2><p>Upload a CSV or Excel roster to create managed marketplace profiles. Review every row and upload or replace each profile photo before import. Existing priest emails are updated instead of duplicated.</p></div></div>
       <PriestImportReview/>
@@ -27,7 +29,7 @@ export default async function PriestsPage({ searchParams }: { searchParams: Prom
     <details className="create-drawer onboard-drawer">
       <summary><UserRoundPlus size={18}/><span><strong>Add one Purohit manually</strong><small>Create the profile, login credentials, locations, and photo gallery in one flow.</small></span></summary>
       <form action={onboardPriest} className="editor-form onboard-form">
-        <div className="form-section"><span>01</span><div><strong>Identity and access</strong><small>Create Supabase Auth credentials that the priest can use immediately.</small></div></div>
+        <div className="form-section"><span>01</span><div><strong>Identity and access</strong><small>Profile basics and the username and password the priest will use to sign in. Nothing is saved until you click Create Purohit account.</small></div></div>
         <div className="form-grid">
           <label>Full name<input name="full_name" required minLength={2} placeholder="Sri Ramachandra Bhat"/></label>
           <label>Phone number<input name="phone" inputMode="tel" required placeholder="+91 98765 43210"/></label>
@@ -48,7 +50,7 @@ export default async function PriestsPage({ searchParams }: { searchParams: Prom
         <div className="form-grid">
           <PriestPhotoUpload/>
           <PriestGalleryUpload/>
-          <label>Initial status<select name="verification_status" defaultValue="pending"><option value="pending">Pending review</option><option value="verified">Verified (public with photo)</option></select></label>
+          <p className="span-2">Admin-created accounts are verified and appear on the customer list as soon as they are saved.</p>
         </div>
         <div className="onboard-summary"><Check size={17}/><span><strong>One-step managed onboarding</strong><small>Creates Supabase login credentials, writes the public profile, stores the gallery, adds service prices, and records the admin action.</small></span></div>
         <div className="form-actions"><button className="primary-button"><UserRoundPlus size={16}/>Create Purohit account</button></div>

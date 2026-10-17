@@ -14,6 +14,6 @@ export const BANGALORE_AREAS = Object.entries(areaGroups).flatMap(([zone, names]
   names.map((name) => ({ name, slug: slugify(name), zone })),
 );
 
-export const LOCAL_PAGE_BASE_URL = "https://purohithconnect.com/purohit-near-me";
+export const LOCAL_PAGE_BASE_URL = "https://bookingg.purohithconnect.com/purohit-near-me";
 
 if (BANGALORE_AREAS.length !== 100) throw new Error(`Expected 100 Bangalore areas, received ${BANGALORE_AREAS.length}`);

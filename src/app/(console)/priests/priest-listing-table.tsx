@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Check, ExternalLink, MapPin, Pencil, X } from "lucide-react";
+import { Check, ExternalLink, MapPin, Pencil } from "lucide-react";
 import { reviewPriest, savePriestListing, setPriestListingVisibility } from "@/app/actions/content";
 import { StatusPill } from "@/components/status-pill";
 import type { getPeopleData } from "@/lib/data";
 import { PriestPhotoUpload } from "./priest-photo-upload";
 import { PriestGalleryUpload } from "./priest-gallery-upload";
 import { LocationTagPicker } from "./location-tag-picker";
+import { PriestPasswordReset } from "./priest-password-reset";
 import styles from "./priest-listing-table.module.css";
 
 type Priest = Awaited<ReturnType<typeof getPeopleData>>["priests"][number];
@@ -41,7 +42,7 @@ export function PriestListingTable({ priests }: { priests: Priest[] }) {
         <div className="provider-score"><strong>{Number(priest.rating).toFixed(1)}</strong><small>{priest.review_count} reviews</small></div>
         <div className="provider-actions">
           {publicReady && <a className="secondary-button" href={`${publicBaseUrl}/purohits/${priest.slug}`} target="_blank" rel="noreferrer"><ExternalLink size={15}/>Profile</a>}
-          <details className="provider-editor"><summary className="secondary-button"><Pencil size={15}/>Edit</summary><form action={savePriestListing} className="editor-form"><input type="hidden" name="id" value={priest.id}/><div className="form-grid">
+          <details className="provider-editor"><summary className="secondary-button"><Pencil size={15}/>Edit</summary><div className="editor-panel"><form action={savePriestListing} className="editor-form"><input type="hidden" name="id" value={priest.id}/><div className="form-grid">
             <label>Name<input name="display_name" defaultValue={priest.display_name || ""} required/></label>
             <label>Headline<input name="profile_headline" defaultValue={priest.profile_headline || ""} placeholder="Vedic priest for home ceremonies"/></label>
             <label className="span-2">About<textarea name="bio" rows={4} defaultValue={priest.bio || ""}/></label>
@@ -52,9 +53,9 @@ export function PriestListingTable({ priests }: { priests: Priest[] }) {
             <label>Puja slugs, comma separated<input name="pooja_slugs" defaultValue={(priest.pooja_slugs || []).join(", ")} placeholder="rudrabhishek, griha-pravesh"/></label>
             <label>Starting price (INR)<input name="starting_price_inr" type="number" min="0" defaultValue={priest.starting_price_inr || 0}/></label>
             <label>Maximum price (INR)<input name="max_price_inr" type="number" min="0" defaultValue={priest.max_price_inr || priest.starting_price_inr || 0}/></label>
-          </div><div className="form-actions"><button className="primary-button">Save marketplace profile</button></div></form></details>
+          </div><div className="form-actions"><button className="primary-button">Save marketplace profile</button></div></form><PriestPasswordReset priestId={priest.id}/></div></details>
           <form action={setPriestListingVisibility}><input type="hidden" name="ids" value={JSON.stringify([priest.id])}/><button className="secondary-button" name="visibility" value={priest.is_listed ? "hide" : "show"}>{priest.is_listed ? "Hide" : "Show"}</button></form>
-          <form action={reviewPriest}><input type="hidden" name="id" value={priest.id}/><input type="hidden" name="status" value="rejected"/><button className="secondary-button" title="Reject profile"><X size={16}/></button></form>
+          <form action={reviewPriest} onSubmit={(event) => { if (!window.confirm(`Reject ${priest.display_name || "this purohit"}? Customers will stop seeing them until you verify again.`)) event.preventDefault(); }}><input type="hidden" name="id" value={priest.id}/><input type="hidden" name="status" value="rejected"/><button className="secondary-button" title="Reject profile">Reject</button></form>
           <form action={reviewPriest}><input type="hidden" name="id" value={priest.id}/><input type="hidden" name="status" value="verified"/><button className="primary-button" title="Verify profile"><Check size={16}/></button></form>
         </div>
       </article>;
