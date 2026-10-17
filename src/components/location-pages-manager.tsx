@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ExternalLink, MapPin, Search, Sparkles } from "lucide-react";
-import { BANGALORE_AREAS, LOCAL_PAGE_BASE_URL } from "@/data/bangalore-areas";
+import { BANGALORE_AREAS } from "@/data/bangalore-areas";
 
 const zones = ["All zones", ...Array.from(new Set(BANGALORE_AREAS.map((area) => area.zone)))];
 
@@ -43,7 +43,7 @@ export function LocationPagesManager({ priests }: { priests: PriestCoverage[] })
           <span>{area.zone}</span>
           <span><strong>{providerCount(area.name)}</strong><small>verified listings</small></span>
           <span><i className="publication-dot"/>Published</span>
-          <span><a className="secondary-button compact-button" href={`${LOCAL_PAGE_BASE_URL}/${area.slug}`} target="_blank" rel="noreferrer">Open <ExternalLink size={14}/></a></span>
+          <span><a className="secondary-button compact-button" href={`/purohit-near-me/${area.slug}`} target="_blank" rel="noreferrer">Open <ExternalLink size={14}/></a></span>
         </div>)}
       </div>
     </section>

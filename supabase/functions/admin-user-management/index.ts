@@ -24,6 +24,57 @@ Deno.serve(async (req: Request) => {
   const fullName = String(body.full_name || "").trim();
   const role = String(body.role || "priest");
 
+  if (action === "reset_priest_password") {
+    if (caller.role !== "super_admin") return json({ error: "Only a super admin can reset priest passwords" }, 403);
+    const profileId = String(body.priest_profile_id || "");
+    const password = String(body.password || "");
+    if (!/^[0-9a-f-]{36}$/i.test(profileId) || password.length < 12 || password.length > 72) {
+      return json({ error: "Choose a priest and a password of 12–72 characters" }, 400);
+    }
+    const { data: profile, error: profileError } = await service.from("priest_profiles").select("id,user_id,display_name").eq("id", profileId).maybeSingle();
+    if (profileError || !profile?.user_id) return json({ error: "Priest profile not found" }, 404);
+    const { data: account } = await service.from("app_users").select("role").eq("id", profile.user_id).maybeSingle();
+    if (account?.role !== "priest") return json({ error: "This profile is not a priest account" }, 403);
+    const { error: updateError } = await service.auth.admin.updateUserById(profile.user_id, { password });
+    if (updateError) return json({ error: updateError.message }, 400);
+    await service.from("admin_actions").insert({ actor_id: caller.id, action: "reset_priest_password", target_type: "priest_profile", target_id: profile.id, note: `Reset login password for ${profile.display_name || "priest"}` });
+    return json({ ok: true });
+  }
+
+  if (action === "reset_user_password") {
+    if (caller.role !== "super_admin") return json({ error: "Only a super admin can reset passwords" }, 403);
+    const userId = String(body.user_id || "");
+    const password = String(body.password || "");
+    if (!/^[0-9a-f-]{36}$/i.test(userId) || password.length < 12 || password.length > 72) return json({ error: "Valid user and password of 12–72 characters required" }, 400);
+    if (userId === caller.id) return json({ error: "Use your own account recovery flow" }, 403);
+    const { data: target } = await service.from("app_users").select("id,role,email").eq("id", userId).maybeSingle();
+    if (!target || target.role === "super_admin") return json({ error: "This account cannot be reset here" }, 403);
+    const { error } = await service.auth.admin.updateUserById(userId, { password });
+    if (error) return json({ error: error.message }, 400);
+    await service.from("admin_actions").insert({ actor_id: caller.id, action: "reset_user_password", target_type: "app_user", target_id: userId, note: `Reset password for ${target.role} account` });
+    return json({ ok: true });
+  }
+
+  if (action === "delete_user") {
+    if (caller.role !== "super_admin") return json({ error: "Only a super admin can delete accounts" }, 403);
+    const userId = String(body.user_id || "");
+    if (!/^[0-9a-f-]{36}$/i.test(userId) || userId === caller.id || body.confirm !== "DELETE") return json({ error: "Confirm the account deletion" }, 400);
+    const { data: target } = await service.from("app_users").select("id,role,email").eq("id", userId).maybeSingle();
+    if (!target || target.role === "super_admin") return json({ error: "This account cannot be deleted here" }, 403);
+    const { data: profile } = await service.from("priest_profiles").select("id").eq("user_id", userId).maybeSingle();
+    const [customerBookings, priestBookings, orders] = await Promise.all([
+      service.from("bookings").select("id", { count: "exact", head: true }).eq("customer_id", userId),
+      profile ? service.from("bookings").select("id", { count: "exact", head: true }).eq("priest_id", profile.id) : Promise.resolve({ count: 0, error: null }),
+      service.from("payment_orders").select("id", { count: "exact", head: true }).eq("customer_id", userId),
+    ]);
+    if (customerBookings.error || priestBookings.error || orders.error) return json({ error: "Could not verify account history" }, 500);
+    if (customerBookings.count || priestBookings.count || orders.count) return json({ error: "Account has booking or payment history. Suspend it to preserve records." }, 409);
+    const { error } = await service.auth.admin.deleteUser(userId);
+    if (error) return json({ error: error.message }, 409);
+    await service.from("admin_actions").insert({ actor_id: caller.id, action: "delete_user", target_type: "app_user", target_id: userId, note: `Deleted ${target.role} account` });
+    return json({ ok: true });
+  }
+
   if (action === "bulk_onboard_priests") {
     if (caller.role !== "super_admin") return json({ error: "Only a super admin can bulk onboard Purohits" }, 403);
     const priests = Array.isArray(body.priests) ? body.priests.slice(0, 250) : [];
@@ -155,6 +206,7 @@ Deno.serve(async (req: Request) => {
         starting_price_inr: startingPrice,
         max_price_inr: maximumPrice,
         verification_status: verificationStatus,
+        is_listed: verificationStatus === "verified",
         onboarding_step: 3,
         submitted_at: now,
         verified_by: verificationStatus === "verified" ? caller.id : null,
@@ -259,6 +311,7 @@ Deno.serve(async (req: Request) => {
       starting_price_inr: startingPrice,
       max_price_inr: maximumPrice,
       verification_status: verificationStatus,
+      is_listed: verificationStatus === "verified",
       onboarding_step: 3,
       submitted_at: now,
       verified_by: verificationStatus === "verified" ? caller.id : null,

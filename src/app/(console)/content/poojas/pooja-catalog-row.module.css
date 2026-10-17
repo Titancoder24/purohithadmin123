@@ -1,0 +1,17 @@
+.item { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto auto; gap: 15px; align-items: center; padding: 15px; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.thumb { position: relative; }
+.changePhoto { position: absolute; inset: 0; border: 0; background: linear-gradient(to top, rgba(33, 23, 19, .78), rgba(33, 23, 19, .15)); color: #fff; font-size: 10px; font-weight: 750; opacity: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; padding: 0 4px 8px; }
+.thumb:hover .changePhoto, .changePhoto:focus-visible { opacity: 1; }
+.edit { justify-self: end; }
+.editor { grid-column: 1 / -1; margin: 4px -15px -15px; border-top: 1px solid var(--line); background: #faf7f5; }
+.editor[hidden] { display: none; }
+@media (max-width: 780px) {
+  .item { grid-template-columns: 58px minmax(0, 1fr) auto; }
+  .toggle { grid-column: 3; grid-row: 1; }
+  .edit { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; }
+  .editor { grid-row: 3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .changePhoto { transition: none; }
+}
